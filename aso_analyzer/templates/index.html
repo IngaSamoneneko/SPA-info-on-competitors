@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>App Search</title>
+</head>
+<body>
+  <input type="text" id="searchInput" placeholder="Введи назву додатку" />
+  <button id="searchButton">Пошук</button>
+  <div id="results"></div>
+
+  <script>
+    document.getElementById('searchButton').addEventListener('click', () => {
+      const query = document.getElementById('searchInput').value;
+      fetch(`http://localhost:8000/api/search?query=${encodeURIComponent(query)}&platform=google-play`)
+        .then(response => response.json())
+        .then(data => {
+          console.log('Отримані дані:', data);
+          const resultsDiv = document.getElementById('results');
+          resultsDiv.innerHTML = ''; // очищаємо попередні результати
+
+          data.forEach(app => {
+            // перевірка, чи є потрібні властивості
+            const title = app.title || 'Без назви';
+            const dev = app.developer_name || 'Без розробника';
+
+            // створюємо HTML-картку
+            const card = document.createElement('div');
+            card.style.border = '1px solid #ccc';
+            card.style.margin = '10px';
+            card.style.padding = '10px';
+            card.innerHTML = `
+              <h3>${title}</h3>
+              <p>Розробник: ${dev}</p>
+              <a href="${app.google_play_url}" target="_blank">Посилання в Google Play</a>
+              <br />
+              <img src="${app.icon}" alt="${title}" width="100" />
+            `;
+            resultsDiv.appendChild(card);
+          });
+        })
+        .catch(err => {
+          console.error('Помилка при запиті:', err);
+        });
+    });
+  </script>
+</body>
+</html>
